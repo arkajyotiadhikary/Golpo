@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { generateStory } from "../controllers/story.controller.js";
+import { generateOptions } from "../controllers/story.controller.js";
 
 const router = Router();
 
-router.post("/gen", generateStory);
+router.post("/options", generateOptions);
 
 export default router;

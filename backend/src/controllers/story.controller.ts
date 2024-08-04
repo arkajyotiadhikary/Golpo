@@ -1,15 +1,19 @@
 import { Request, Response } from "express";
-import { generate } from "../utils/transformer.js";
+import {
+      generateNextScenario as generateNxtScenario,
+      generateOptions as generateOpt,
+} from "../utils/transformer.js";
 
-const generateStory = async (req: Request, res: Response) => {
+const generateOptions = async (req: Request, res: Response) => {
       const { prompt } = req.body;
       console.log("Prompt is ", prompt);
       try {
-            const story = await generate(prompt);
-            if (story) res.status(200).json({ story });
+            const options = await generateOpt(prompt, 3);
+            if (options.length > 0) res.status(200).json({ options });
+            else res.status(500).json({ error: "No options found." });
       } catch (error) {
             res.status(500).json({ error });
       }
 };
 
-export { generateStory };
+export { generateOptions };
