@@ -1,7 +1,26 @@
-import { pipeline, TextGenerationPipeline } from "@xenova/transformers";
+import { pipeline, TextGenerationPipeline, QuestionAnsweringPipeline } from "@xenova/transformers";
 
 const generatePipeline = async (): Promise<TextGenerationPipeline> => {
       return pipeline("text-generation", "Xenova/llama2.c-stories15M");
+};
+
+const QAPipeline = async (): Promise<QuestionAnsweringPipeline> => {
+      return pipeline("question-answering", "distilbert-base-cased-distilled-squad");
+};
+
+export const answerQuestion = async (question: string, context: string): Promise<string> => {
+      console.log("Answering question...", question);
+      const qaPipeline = await QAPipeline();
+      try {
+            const output = await qaPipeline(question, context);
+            console.log("Raw output:", output);
+            const answer = output.answer;
+            console.log("Answer generated:", answer);
+            return answer;
+      } catch (error) {
+            console.error("Error answering question.", error);
+            throw error;
+      }
 };
 
 export const generateOptions = async (
