@@ -23,44 +23,64 @@ export const answerQuestion = async (question: string, context: string): Promise
       }
 };
 
+interface Scenario {
+      description: string;
+      options: string[];
+}
+
 export const generateOptions = async (
-      prompt: string,
+      currentScenario: string,
       numOptions: number = 3
-): Promise<string[]> => {
-      console.log("Generating options...", prompt);
+): Promise<Scenario> => {
+      console.log("Generating options...", currentScenario);
       const generator = await generatePipeline();
       try {
+            const prompt = `${currentScenario}\n\nPlease provide ${numOptions} distinct options for the user to choose from and separete them with $$`;
             const output = await generator(prompt, {
-                  max_length: 100, // Shorter length for options
+                  max_length: 150, // Adjusted length for options generation
                   temperature: 0.9,
                   top_p: 0.95, // Use nucleus sampling
-                  num_return_sequences: numOptions, // Number of options to generate
+                  num_return_sequences: 2, // Number of options to generate
                   do_sample: true, // Enable sampling
             });
             console.log("Raw output:", output);
-            const options = output.map((item: any) => item.generated_text.trim());
+            const options = output[0].generated_text.trim().replace(prompt, "");
             console.log("Options generated:", options);
-            return options;
+
+            const scenario: Scenario = {
+                  description: currentScenario,
+                  options: options,
+            };
+
+            return scenario;
       } catch (error) {
             console.error("Error generating options.", error);
             throw error;
       }
 };
 
-export const generateNextScenario = async (prompt: string): Promise<string> => {
-      console.log("Generating next scenario...", prompt);
+export const generateNextScenario = async (
+      currentScenario: string,
+      chosenOption: string
+): Promise<Scenario> => {
+      console.log("Generating next scenario...", currentScenario, chosenOption);
       const generator = await generatePipeline();
       try {
+            const prompt = `${currentScenario}\n\nThe user chose the following option: "${chosenOption}". Please generate the next scenario based on this choice.`;
             const output = await generator(prompt, {
-                  max_length: 200, // Longer length for the next scenario
+                  max_length: 250, // Adjusted length for the next scenario
                   temperature: 0.9,
                   no_repeat_ngram_size: 2,
                   num_return_sequences: 1,
                   do_sample: true, // Enable sampling
             });
             console.log("Raw output:", output);
-            const nextScenario = output[0].generated_text.trim();
-            console.log("Next scenario generated:", nextScenario);
+            const nextScenarioDescription = output[0].generated_text.trim().replace(prompt, "");
+            console.log("Next scenario description generated:", nextScenarioDescription);
+
+            // Generate options for the new scenario
+            const nextScenario = await generateOptions(nextScenarioDescription);
+
             return nextScenario;
       } catch (error) {
             console.error("Error generating next scenario.", error);

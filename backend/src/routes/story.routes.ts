@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { generateOptions } from "../controllers/story.controller.js";
+import { getOptions } from "../controllers/story.controller.js";
 
 const router = Router();
 
-router.post("/options", generateOptions);
+router.post("/options", getOptions);
+router.post("/answer", getOptions);
 
 export default router;
