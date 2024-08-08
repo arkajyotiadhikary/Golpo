@@ -1,29 +1,31 @@
 import { Request, Response } from "express";
-import { generateNextScenario, generateOptions, answerQuestion } from "../utils/transformer.js";
+import { generateOptionsHfInference } from "../utils/transformer.js";
 
-const getOptions = async (req: Request, res: Response) => {
-      const { prompt } = req.body;
-      console.log("Prompt is ", prompt);
-      try {
-            const options = await generateOptions(prompt, 3);
-            if (options) res.status(200).json({ options });
-            else res.status(500).json({ error: "No options found." });
-      } catch (error) {
-            res.status(500).json({ error });
-      }
+/*
+ * start the story using this function
+ * take input username from the user
+ * have a const prompt to form the startig prompt
+ */
+
+const constructPrompt = (scenario: string) => {
+      return `Scenario: "${scenario}"\nGenerate three possible actions the character could take:\n1. Most dengerous:\n2. Medium danger:\n3. Safest:. In one sentence.`;
 };
 
-const getAnswer = async (req: Request, res: Response) => {
-      const { question, context } = req.body;
-      console.log("Question is ", question);
-      console.log("Context is ", context);
+const startStory = async (req: Request, res: Response) => {
+      const { username } = req.body;
+
+      const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
+
+      // Here ill have the generate options
       try {
-            const answer = await answerQuestion(question, context);
-            if (answer) res.status(200).json({ answer });
-            else res.status(500).json({ error: "No answer found." });
-      } catch (error) {
-            res.status(500).json({ error });
+            const options = await generateOptionsHfInference(constructPrompt(prePrompt));
+            if (options) return res.status(200).json({ options });
+      } catch (error: any) {
+            console.error("Error generating options", error);
+            throw error;
       }
+
+      return res.status(200).json({ prompt: prePrompt });
 };
 
-export { getOptions, getAnswer };
+export { startStory };

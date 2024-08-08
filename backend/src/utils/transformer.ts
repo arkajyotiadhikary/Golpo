@@ -1,89 +1,54 @@
-import { pipeline, TextGenerationPipeline, QuestionAnsweringPipeline } from "@xenova/transformers";
+/*
+ *  ## TODO ##
+ * Trying out HfInference
+ * Hugging face API didnt worked.
+ */
+import dotenv from "dotenv";
+dotenv.config();
 
-const generatePipeline = async (): Promise<TextGenerationPipeline> => {
-      return pipeline("text-generation", "Xenova/llama2.c-stories15M");
-};
+// Using hugging face inference
+import { HfInference } from "@huggingface/inference";
+import { error } from "console";
 
-const QAPipeline = async (): Promise<QuestionAnsweringPipeline> => {
-      return pipeline("question-answering", "distilbert-base-cased-distilled-squad");
-};
+const token = process.env.HUGGING_FACE_TOKEN;
+console.log("Loaded hf token: ", token);
 
-export const answerQuestion = async (question: string, context: string): Promise<string> => {
-      console.log("Answering question...", question);
-      const qaPipeline = await QAPipeline();
-      try {
-            const output = await qaPipeline(question, context);
-            console.log("Raw output:", output);
-            const answer = output.answer;
-            console.log("Answer generated:", answer);
-            return answer;
-      } catch (error) {
-            console.error("Error answering question.", error);
-            throw error;
-      }
-};
+// Hf initialz
+const hf = new HfInference(token);
 
 interface Scenario {
       description: string;
       options: string[];
 }
 
-export const generateOptions = async (
-      currentScenario: string,
-      numOptions: number = 3
-): Promise<Scenario> => {
-      console.log("Generating options...", currentScenario);
-      const generator = await generatePipeline();
+// Using hf inference chat compeletion to generate options
+export const generateOptionsHfInference = async (
+      scenerio: string
+): Promise<Scenario | undefined> => {
+      console.log("Generating options using Hf Inference");
       try {
-            const prompt = `${currentScenario}\n\nPlease provide ${numOptions} distinct options for the user to choose from and separete them with $$`;
-            const output = await generator(prompt, {
-                  max_length: 150, // Adjusted length for options generation
-                  temperature: 0.9,
-                  top_p: 0.95, // Use nucleus sampling
-                  num_return_sequences: 2, // Number of options to generate
-                  do_sample: true, // Enable sampling
+            const out = await hf.chatCompletion({
+                  model: "mistralai/Mistral-7B-Instruct-v0.2",
+                  messages: [{ role: "user", content: scenerio }],
+                  temperature: 0.7,
+                  max_tokens: 150,
+                  top_p: 0.95,
+                  top_k: 50,
             });
-            console.log("Raw output:", output);
-            const options = output[0].generated_text.trim().replace(prompt, "");
-            console.log("Options generated:", options);
 
-            const scenario: Scenario = {
-                  description: currentScenario,
-                  options: options,
-            };
+            const options = out.choices[0].message.content?.trim().split("\n");
 
-            return scenario;
-      } catch (error) {
-            console.error("Error generating options.", error);
-            throw error;
-      }
-};
-
-export const generateNextScenario = async (
-      currentScenario: string,
-      chosenOption: string
-): Promise<Scenario> => {
-      console.log("Generating next scenario...", currentScenario, chosenOption);
-      const generator = await generatePipeline();
-      try {
-            const prompt = `${currentScenario}\n\nThe user chose the following option: "${chosenOption}". Please generate the next scenario based on this choice.`;
-            const output = await generator(prompt, {
-                  max_length: 250, // Adjusted length for the next scenario
-                  temperature: 0.9,
-                  no_repeat_ngram_size: 2,
-                  num_return_sequences: 1,
-                  do_sample: true, // Enable sampling
-            });
-            console.log("Raw output:", output);
-            const nextScenarioDescription = output[0].generated_text.trim().replace(prompt, "");
-            console.log("Next scenario description generated:", nextScenarioDescription);
-
-            // Generate options for the new scenario
-            const nextScenario = await generateOptions(nextScenarioDescription);
-
-            return nextScenario;
-      } catch (error) {
-            console.error("Error generating next scenario.", error);
-            throw error;
+            console.log(out.choices[0].message);
+            if (options)
+                  return {
+                        description: scenerio,
+                        options,
+                  };
+            else {
+                  console.log("No options found");
+                  throw error;
+            }
+      } catch (error: any) {
+            console.error("Error generating options", error);
       }
 };
