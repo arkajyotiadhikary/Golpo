@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { generateOptionsHfInference } from "../utils/transformer.js";
+import { generateOptionsHfInference, generateScenarioHfInference } from "../utils/transformer.js";
 
 /*
  * start the story using this function
@@ -7,25 +7,57 @@ import { generateOptionsHfInference } from "../utils/transformer.js";
  * have a const prompt to form the startig prompt
  */
 
-const constructPrompt = (scenario: string) => {
-      return `Scenario: "${scenario}"\nGenerate three possible actions the character could take:\n1. Most dengerous:\n2. Medium danger:\n3. Safest:. In one sentence.`;
-};
 
-const startStory = async (req: Request, res: Response) => {
-      const { username } = req.body;
+const gameManager = async(scenario:string, gamestat:"start"|"continue"|"end", username?:string ,useroption?: string) => {
+	
+	console.log("Running game manager");
 
-      const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
+	switch(gamestat){
+		case "start":{
+			console.log("Game has been started");
+
+			const prompt = `Scenario: "${scenario}"\nGenerate three possible actions the character could take:\n1. Most dengerous:\n2. Medium danger:\n3. Safest:. In one sentence.`;
+			try{
+				const options = await generateOptionsHfInference(prompt);
+				if(options) return options;
+			}catch(error:any){
+				console.error("Error generating starting options");
+				throw error;
+			}
+		}
+		case "continue":{
+			//TODO create a prompt with prev scenario and user option
+			//insead of sending description from utins/transformer send it from here
+			//using ai generate the next scenerio and the options
+			try{
+				const nextScenario = await generateScenarioHfInference(scenario,useroption!);
+				if(nextScenario) return nextScenario;
+			}catch(error:any){
+				console.log("Error generating scenario",error);
+				throw error;
+			}
+		}
+		case "end":{
+			return;
+		}
+		default:
+		{
+			return;
+		}
+	}	
+}
+
+const story = async (req: Request, res: Response) => {
+      	const { username, stat, scenario, useroption } = req.body;
+	console.log("Data recived: ", username, stat, scenario, useroption);
+	const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
+
 
       // Here ill have the generate options
-      try {
-            const options = await generateOptionsHfInference(constructPrompt(prePrompt));
-            if (options) return res.status(200).json({ options });
-      } catch (error: any) {
-            console.error("Error generating options", error);
-            throw error;
-      }
+      const result = await gameManager(scenario?scenario:prePrompt, stat, username, useroption);
+      if(result) res.status(200).json({result})
+      else res.status(500);
 
-      return res.status(200).json({ prompt: prePrompt });
 };
 
-export { startStory };
+export { story };
