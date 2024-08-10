@@ -26,7 +26,7 @@ interface Scenario {
 
 const hfChatCompletion = async(content:string) => {
 	return await hf.chatCompletion({
-		 model: "mistralai/Mistral-7B-Instruct-v0.2",
+		  model: "mistralai/Mistral-7B-Instruct-v0.2",
                   messages: [{ role: "user", content }],
                   temperature: 0.7,
                   max_tokens: 150,
