@@ -37,6 +37,24 @@ const hfChatCompletion = async(content:string) => {
 
 // Generate continue prompt
 // TODO: add risk of death losing point and etc... (Brainstorm about it later)
+export const generateImageFromPrompt = async(prompt:string)=> {
+  console.log(`Generatng image for the prompt ${prompt}`)
+  const out = await hf.textToImage({
+    model: 'prompthero/openjourney-v4',
+    inputs:prompt,
+    parameters: {
+      negative_prompt: 'easynegative',
+    } 
+  });
+  if(out){
+    const buffer = Buffer.from(await out.arrayBuffer());
+    const base64Image = `data:${out.type};base64,${buffer.toString('base64')}`;
+    return base64Image;
+  } 
+
+  return;
+}
+
 const generateContinuePrompt = (scenario:string,option:string) => {
 	return `The scenario was ${scenario} and user has choose the option ${option}. Generate the next scenario.`
 }

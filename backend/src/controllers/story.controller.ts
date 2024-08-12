@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { generateOptionsHfInference, generateScenarioHfInference } from "../utils/transformer.js";
+import { generateOptionsHfInference, generateScenarioHfInference, generateImageFromPrompt } from "../utils/transformer.js";
 
 /*
  * start the story using this function
@@ -55,9 +55,24 @@ const story = async (req: Request, res: Response) => {
 
       // Here ill have the generate options
       const result = await gameManager(scenario?scenario:prePrompt, stat, username, useroption);
-      if(result) res.status(200).json({result})
-      else res.status(500);
+      if(result) return res.status(200).json({result})
+      else return res.status(500);
 
 };
 
-export { story };
+//Generate image using AI
+
+const getImage = async(req:Request,res:Response)=>{
+  const {prompt} = req.body;
+  try{
+    const result = await generateImageFromPrompt(prompt);
+    console.log("image result ",result);
+    if(result)return res.json({image:result});
+
+  }catch(error:any){
+    console.error('Error generating image!',error);
+    throw error;
+  }
+}
+
+export { story, getImage };
