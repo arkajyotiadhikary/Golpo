@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { generateOptionsHfInference, generateScenarioHfInference, generateImageFromPrompt } from "../utils/transformer.js";
+import { generateOptionsHfInference, generateScenarioHfInference, generateImageFromPrompt, generateTextFromPrompt } from "../utils/transformer.js";
 
 /*
  * start the story using this function
@@ -66,7 +66,6 @@ const getImage = async(req:Request,res:Response)=>{
   const {prompt} = req.body;
   try{
     const result = await generateImageFromPrompt(prompt);
-    console.log("image result ",result);
     if(result)return res.json({image:result});
 
   }catch(error:any){
@@ -75,4 +74,18 @@ const getImage = async(req:Request,res:Response)=>{
   }
 }
 
-export { story, getImage };
+// Generat Random Text using AI
+
+const getText = async(req:Request,res:Response) =>{
+  const {prompt} = req.body;
+  try{
+    const result = await generateTextFromPrompt(prompt);
+    if(result) return res.json({result});
+  }catch(error:any){
+    console.error("Error generating text",error);
+    throw error;
+  };
+
+}
+
+export { story, getImage, getText };

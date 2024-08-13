@@ -29,7 +29,7 @@ const hfChatCompletion = async(content:string) => {
 		  model: "mistralai/Mistral-7B-Instruct-v0.2",
                   messages: [{ role: "user", content }],
                   temperature: 0.7,
-                  max_tokens: 150,
+                  max_tokens: 500,
                   top_p: 0.95,
                   top_k: 50,
 	})
@@ -37,6 +37,7 @@ const hfChatCompletion = async(content:string) => {
 
 // Generate continue prompt
 // TODO: add risk of death losing point and etc... (Brainstorm about it later)
+
 export const generateImageFromPrompt = async(prompt:string)=> {
   console.log(`Generatng image for the prompt ${prompt}`)
   const out = await hf.textToImage({
@@ -55,11 +56,38 @@ export const generateImageFromPrompt = async(prompt:string)=> {
   return;
 }
 
+//Generate normal text for the websites here and there usage
+
+export const generateTextFromPrompt = async(prompt:string) =>{
+  console.log("Generating text from prompt");
+  try{
+    const out = await hfChatCompletion(prompt);
+    const result = out.choices[0].message.content?.trim();
+    if(result) return result;
+    return;
+  }catch(error:any){
+    console.error("Error generating ")
+  }
+
+}
+// Method to generate continue prompt.
 const generateContinuePrompt = (scenario:string,option:string) => {
-	return `The scenario was ${scenario} and user has choose the option ${option}. Generate the next scenario.`
+	return `The scenario was ${scenario} and user has choose the option ${option}. Generate the next scenario in json formate.`
+}
+
+// Method to formate a output to json.
+const formateStringToJSON = (text:string)=>{
+  try{
+    const stringObj = JSON.parse(text);
+    return stringObj;
+  }catch(error:any)
+  {
+    console.error("Error converting string to json",error);
+  }
 }
 
 // Using hf inference chat compeletion to generate options
+
 export const generateOptionsHfInference = async (
       scenerio: string
 ): Promise<Scenario | undefined> => {
@@ -84,6 +112,7 @@ export const generateOptionsHfInference = async (
 };
 
 // Inputs prev scenario and user option
+
 export const generateScenarioHfInference = async(prevScenario:string, userOption:string): Promise<Scenario|undefined> => {
 	console.log("Generating scenario from option and prev scenario");
 	try{
@@ -95,7 +124,7 @@ export const generateScenarioHfInference = async(prevScenario:string, userOption
 
 		if(scenario)
 			return {
-				description: scenario,
+				description: formateStringToJSON(scenario),
 			};
 		else {
 			console.log("No scenario has been generated!!");
