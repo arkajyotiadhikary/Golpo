@@ -8,18 +8,20 @@ import { generateOptionsHfInference, generateScenarioHfInference, generateImageF
  */
 
 
-const gameManager = async(scenario:string, gamestat:"start"|"continue"|"end", username?:string ,useroption?: string) => {
+const gameManager = async(scenario?:string, gamestat:"start"|"continue"|"end", username?:string ,useroption?: string) => {
 	
 	console.log("Running game manager");
 
 	switch(gamestat){
 		case "start":{
 			console.log("Game has been started");
-
-			const prompt = `Scenario: "${scenario}"\nGenerate three possible actions the character could take:\n1. Most dengerous:\n2. Medium danger:\n3. Safest:. In one sentence.`;
+      const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
 			try{
-				const options = await generateOptionsHfInference(prompt);
-				if(options) return options;
+				const options = await generateOptionsHfInference(prePrompt);
+				if(options) return{
+          scenario: prePrompt,
+          options
+        };
 			}catch(error:any){
 				console.error("Error generating starting options");
 				throw error;
@@ -31,7 +33,12 @@ const gameManager = async(scenario:string, gamestat:"start"|"continue"|"end", us
 			//using ai generate the next scenerio and the options
 			try{
 				const nextScenario = await generateScenarioHfInference(scenario,useroption!);
-				if(nextScenario) return nextScenario;
+        const options = await generateOptionsHfInference(nextScenario);
+				if(nextScenario && options) 
+          return {
+            scenario:nextScenario,
+            options
+        };
 			}catch(error:any){
 				console.log("Error generating scenario",error);
 				throw error;
@@ -48,16 +55,13 @@ const gameManager = async(scenario:string, gamestat:"start"|"continue"|"end", us
 }
 
 const story = async (req: Request, res: Response) => {
-      	const { username, stat, scenario, useroption } = req.body;
-	console.log("Data recived: ", username, stat, scenario, useroption);
-	const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
-
-
+      const { username, stat, scenario, useroption } = req.body;
+	    console.log("Data recived: ", username, stat, scenario, useroption);
+	
       // Here ill have the generate options
-      const result = await gameManager(scenario?scenario:prePrompt, stat, username, useroption);
+      const result = await gameManager(scenario, stat, username, useroption);
       if(result) return res.status(200).json({result})
       else return res.status(500);
-
 };
 
 //Generate image using AI

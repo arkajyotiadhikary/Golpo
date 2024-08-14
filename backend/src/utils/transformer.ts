@@ -1,17 +1,12 @@
-/*  Transformer.ts   */
-
-
-/* 
- * ## TODO ##
- * Trying out HfInference
- * Hugging face API didnt worked.
- */
 import dotenv from "dotenv";
 dotenv.config();
 
 // Using hugging face inference
 import { HfInference } from "@huggingface/inference";
 import { error } from "console";
+
+// Prompts
+import {generateContinuePrompt, generateOptionPrompt} from "./prompts.js";
 
 const token = process.env.HUGGING_FACE_TOKEN;
 console.log("Loaded hf token: ", token);
@@ -56,8 +51,7 @@ export const generateImageFromPrompt = async(prompt:string)=> {
   return;
 }
 
-//Generate normal text for the websites here and there usage
-
+// Generate normal text for the websites here and there usage
 export const generateTextFromPrompt = async(prompt:string) =>{
   console.log("Generating text from prompt");
   try{
@@ -68,40 +62,21 @@ export const generateTextFromPrompt = async(prompt:string) =>{
   }catch(error:any){
     console.error("Error generating ")
   }
-
-}
-// Method to generate continue prompt.
-const generateContinuePrompt = (scenario:string,option:string) => {
-	return `The scenario was ${scenario} and user has choose the option ${option}. Generate the next scenario in json formate.`
-}
-
-// Method to formate a output to json.
-const formateStringToJSON = (text:string)=>{
-  try{
-    const stringObj = JSON.parse(text);
-    return stringObj;
-  }catch(error:any)
-  {
-    console.error("Error converting string to json",error);
-  }
 }
 
 // Using hf inference chat compeletion to generate options
-
 export const generateOptionsHfInference = async (
-      scenerio: string
-): Promise<Scenario | undefined> => {
+      scenario: string
+) => {
       console.log("Generating options using Hf Inference");
       try {
-            const out = await hfChatCompletion(scenerio);
+            const prompt = generateOptionPrompt(scenario);
+            const out = await hfChatCompletion(prompt);
             const options = out.choices[0].message.content?.trim().replace('"\"',"").split("\n");
             console.log(out.choices[0].message);
 
             if (options)
-                  return {
-                        description: scenerio,
-                        options,
-                  };
+                  return options;
             else {
                   console.log("No options found");
                   return;
@@ -112,8 +87,7 @@ export const generateOptionsHfInference = async (
 };
 
 // Inputs prev scenario and user option
-
-export const generateScenarioHfInference = async(prevScenario:string, userOption:string): Promise<Scenario|undefined> => {
+export const generateScenarioHfInference = async(prevScenario:string, userOption:string) => {
 	console.log("Generating scenario from option and prev scenario");
 	try{
 		const prompt = generateContinuePrompt(prevScenario, userOption);
@@ -123,9 +97,13 @@ export const generateScenarioHfInference = async(prevScenario:string, userOption
 		console.log("Generated continue scenario is: ",scenario);
 
 		if(scenario)
-			return {
-				description: formateStringToJSON(scenario),
-			};
+    {
+      //Generate options for the scenario 
+      const options = await generateOptionsHfInference(scenario);
+      if(options)
+	    return scenario;
+      else return;
+    }
 		else {
 			console.log("No scenario has been generated!!");
 			return;
@@ -135,8 +113,7 @@ export const generateScenarioHfInference = async(prevScenario:string, userOption
 		console.error("Error generating scenarios");
 		throw error;
 			  
-	}
-	
+	}	
 }
 
 
