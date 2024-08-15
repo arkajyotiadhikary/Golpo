@@ -8,85 +8,85 @@ import { generateOptionsHfInference, generateScenarioHfInference, generateImageF
  */
 
 
-const gameManager = async(scenario:string, gamestat:"start"|"continue"|"end", username?:string ,useroption?: string) => {
-	
-	console.log("Running game manager");
+const gameManager = async (scenario: string, gamestat: "start" | "continue" | "end", username?: string, useroption?: string) => {
 
-	switch(gamestat){
-		case "start":{
-			console.log("Game has been started");
+  console.log("Running game manager");
+
+  switch (gamestat) {
+    case "start": {
+      console.log("Game has been started");
       const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
-			try{
-				const options = await generateOptionsHfInference(prePrompt);
-				if(options) return{
+      try {
+        const options = await generateOptionsHfInference(prePrompt);
+        if (options) return {
           scenario: prePrompt,
           options
         };
-			}catch(error:any){
-				console.error("Error generating starting options");
-				throw error;
-			}
-		}
-		case "continue":{
-			//TODO create a prompt with prev scenario and user option
-			//insead of sending description from utins/transformer send it from here
-			//using ai generate the next scenerio and the options
-			try{
-				const nextScenario = await generateScenarioHfInference(scenario,useroption!);
+      } catch (error: any) {
+        console.error("Error generating starting options");
+        throw error;
+      }
+    }
+    case "continue": {
+      //TODO create a prompt with prev scenario and user option
+      //insead of sending description from utins/transformer send it from here
+      //using ai generate the next scenerio and the options
+      try {
+        const nextScenario = await generateScenarioHfInference(scenario, useroption!);
         const options = await generateOptionsHfInference(nextScenario!);
-				if(nextScenario && options) 
+        if (nextScenario && options)
           return {
-            scenario:nextScenario,
+            scenario: nextScenario,
             options
-        };
-			}catch(error:any){
-				console.log("Error generating scenario",error);
-				throw error;
-			}
-		}
-		case "end":{
-			return;
-		}
-		default:
-		{
-			return;
-		}
-	}	
+          };
+      } catch (error: any) {
+        console.log("Error generating scenario", error);
+        throw error;
+      }
+    }
+    case "end": {
+      return;
+    }
+    default:
+      {
+        return;
+      }
+  }
 }
 
 const story = async (req: Request, res: Response) => {
-      const { username, stat, scenario, useroption } = req.body;
-	    console.log("Data recived: ", username, stat, scenario, useroption);
-	
-      // Here ill have the generate options
-      const result = await gameManager(scenario ? scenario : "", stat, username, useroption);
-      if(result) return res.status(200).json({result})
-      else return res.status(500);
+  const { username, stat, scenario, useroption } = req.body;
+  console.log("Data recived: ", username, stat, scenario, useroption);
+
+  // Here ill have the generate options
+  const result = await gameManager(scenario ? scenario : "", stat, username, useroption);
+  if (result) return res.status(200).json({ result })
+  else return res.status(500);
 };
 
 //Generate image using AI
 
-const getImage = async(req:Request,res:Response)=>{
-  const {prompt} = req.body;
-  try{
+const getImage = async (req: Request, res: Response) => {
+  const { prompt } = req.body;
+  try {
     const result = await generateImageFromPrompt(prompt);
-    if(result)return res.json({image:result});
+    if (result) return res.json({ image: result });
 
-  }catch(error:any){
-    console.error('Error generating image!',error);
-    throw error;
+  } catch (error: any) {
+    console.error('Error generating image!', error);
+    res.json({ image: "" });
   }
 }
 
 // Generat Random Text using AI
 
-const getText = async(req:Request,res:Response) =>{
-  const {prompt} = req.body;
-  try{
+const getText = async (req: Request, res: Response) => {
+  const { prompt } = req.body;
+  try {
     const result = await generateTextFromPrompt(prompt);
-    if(result) return res.json({result});
-  }catch(error:any){
-    console.error("Error generating text",error);
+    if (result) return res.json({ result });
+  } catch (error: any) {
+    console.error("Error generating text", error);
     throw error;
   };
 
