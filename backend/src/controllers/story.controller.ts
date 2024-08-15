@@ -8,7 +8,7 @@ import { generateOptionsHfInference, generateScenarioHfInference, generateImageF
  */
 
 
-const gameManager = async(scenario?:string, gamestat:"start"|"continue"|"end", username?:string ,useroption?: string) => {
+const gameManager = async(scenario:string, gamestat:"start"|"continue"|"end", username?:string ,useroption?: string) => {
 	
 	console.log("Running game manager");
 
@@ -33,7 +33,7 @@ const gameManager = async(scenario?:string, gamestat:"start"|"continue"|"end", u
 			//using ai generate the next scenerio and the options
 			try{
 				const nextScenario = await generateScenarioHfInference(scenario,useroption!);
-        const options = await generateOptionsHfInference(nextScenario);
+        const options = await generateOptionsHfInference(nextScenario!);
 				if(nextScenario && options) 
           return {
             scenario:nextScenario,
@@ -59,7 +59,7 @@ const story = async (req: Request, res: Response) => {
 	    console.log("Data recived: ", username, stat, scenario, useroption);
 	
       // Here ill have the generate options
-      const result = await gameManager(scenario, stat, username, useroption);
+      const result = await gameManager(scenario ? scenario : "", stat, username, useroption);
       if(result) return res.status(200).json({result})
       else return res.status(500);
 };
