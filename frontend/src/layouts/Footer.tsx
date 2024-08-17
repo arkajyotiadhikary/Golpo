@@ -1,8 +1,5 @@
-import React from "react";
-
-
-const Footer = ()=>{
-	return <div className="footer bg-taupe-100 text-white flex flex-col p-4 text-start space-y-4 w-full h-full">
+const Footer = () => {
+  return <div className="footer bg-taupe-100 text-white flex flex-col p-4 text-start space-y-4 w-full h-full">
     <div className="flex gap-4">
       <a className="underline hover:cursor-pointer">Linkedin</a>
       <a className="underline hover:cursor-pointer">Github</a>
