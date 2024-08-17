@@ -3,8 +3,6 @@ dotenv.config();
 
 // Using hugging face inference
 import { HfInference } from "@huggingface/inference";
-import { error } from "console";
-
 // Prompts
 import { generateContinuePrompt, generateOptionPrompt } from "./prompts.js";
 
@@ -14,10 +12,6 @@ console.log("Loaded hf token: ", token);
 // Hf initialz
 const hf = new HfInference(token);
 
-interface Scenario {
-  description: string;
-  options?: string[];
-}
 
 const hfChatCompletion = async (content: string) => {
   return await hf.chatCompletion({
@@ -87,10 +81,10 @@ export const generateOptionsHfInference = async (
 };
 
 // Inputs prev scenario and user option
-export const generateScenarioHfInference = async (prevScenario: string, userOption: string) => {
+export const generateScenarioHfInference = async (prevScenario: string, userOption: string, riskLevel: string) => {
   console.log("Generating scenario from option and prev scenario");
   try {
-    const prompt = generateContinuePrompt(prevScenario, userOption);
+    const prompt = generateContinuePrompt(prevScenario, userOption, riskLevel);
     const out = await hfChatCompletion(prompt);
     const scenario = out.choices[0].message.content?.trim();
 

@@ -2,17 +2,19 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { http } from "../utils/axios.ts";
 import Footer from '../layouts/Footer.tsx';
+import GameUI from "../components/GameUI.tsx"
 
 const Story = () => {
   const { state } = useLocation();
   const { username } = state || {};
 
-  const riskLevel = ['High', 'Mid', 'Safe'];
+  const riskLevel = ['high', 'mid', 'safe'] as const;
 
   const [gameData, setGameDate] = useState({
     scenario: "",
     options: []
   });
+
   const [image, setImage] = useState("");
   const [getImage, setGetImage] = useState(true); // To handle do we need AI genererated images or not.
 
@@ -29,29 +31,35 @@ const Story = () => {
 
 
   // fetch the starting story and the options
-  const fetchStory = async (scenario: string, gamestat: "start" | "continue" | "end", username?: string, useroption?: string, riskLevel: 'High' | 'Mid' | 'Safe') => {
+  const fetchStory = async (scenario: string,
+    gamestat: "start" | "continue" | "end",
+    riskLevel: 'high' | 'mid' | 'safe',
+    username?: string, useroption?: string,
+  ) => {
     const response = await http.post("http://localhost:8080/story", {
       scenario,
       stat: gamestat,
       username,
       useroption,
+      riskLevel
     });
     if (response) {
       setGameDate(response.data.result)
       if (getImage) // If user wants the AI generaeted images request here
       {
-        setImage(fetchImage(gameData.scenario));
+        const image = await fetchImage(gameData.scenario);
+        setImage(image);
       }
     };
   };
 
-  const handleNext = (e, riskLevel) => {
-    const useroption = e.target.value;
+  const handleNext = (e: React.MouseEvent<HTMLButtonElement>, riskLevel: 'high' | 'mid' | 'safe') => {
+    const useroption = e.currentTarget.value;
     fetchStory(gameData.scenario, "continue", username, useroption, riskLevel);
   }
 
   useEffect(() => {
-    fetchStory("", "start", username, "");
+    fetchStory("", "start", username, "", "safe");
   }, [])
 
 
@@ -82,7 +90,7 @@ const Story = () => {
             {gameData.options.map((option, index) => (
               <li key={index}>
                 <button
-                  onClick={handleNext}
+                  onClick={(e) => handleNext(e, riskLevel[index])}
                   value={option.replace(/^\d+\.\s*/, '')}
                   className="w-full px-6 py-3 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700 focus:outline-none transition-colors duration-300"
                 >
@@ -91,6 +99,7 @@ const Story = () => {
               </li>
             ))}
           </ul>
+          <GameUI />
         </div>
       </div>
       <Footer />

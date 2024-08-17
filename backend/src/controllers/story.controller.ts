@@ -10,7 +10,7 @@ import LuckSystem from '../utils/luck.js';
 
 const redis = new Redis();
 
-const gameManager = async (scenario: string, gamestat: "start" | "continue" | "end", username?: string, useroption?: string) => {
+const gameManager = async (scenario: string, gamestat: "start" | "continue" | "end", riskLevel: string, username?: string, useroption?: string) => {
 
   console.log("Running game manager");
 
@@ -34,7 +34,7 @@ const gameManager = async (scenario: string, gamestat: "start" | "continue" | "e
       //insead of sending description from utins/transformer send it from here
       //using ai generate the next scenerio and the options
       try {
-        const nextScenario = await generateScenarioHfInference(scenario, useroption!);
+        const nextScenario = await generateScenarioHfInference(scenario, useroption!, riskLevel);
         const options = await generateOptionsHfInference(nextScenario!);
         if (nextScenario && options)
           return {
