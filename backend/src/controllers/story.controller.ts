@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { generateOptionsHfInference, generateScenarioHfInference, generateImageFromPrompt, generateTextFromPrompt } from "../utils/transformer.js";
-
+import Redis from 'ioredis';
+import LuckSystem from '../utils/luck.js';
 /*
  * start the story using this function
  * take input username from the user
  * have a const prompt to form the startig prompt
  */
 
+const redis = new Redis();
 
 const gameManager = async (scenario: string, gamestat: "start" | "continue" | "end", username?: string, useroption?: string) => {
 
@@ -55,8 +57,18 @@ const gameManager = async (scenario: string, gamestat: "start" | "continue" | "e
 }
 
 const story = async (req: Request, res: Response) => {
-  const { username, stat, scenario, useroption } = req.body;
-  console.log("Data recived: ", username, stat, scenario, useroption);
+  const { username, stat, scenario, useroption, riskLevel } = req.body;
+  console.log("Data recived: ", username, stat, scenario, useroption, riskLevel);
+
+  let userLuck = await redis.get(`luck:${username}`);
+
+  if (userLuck === null) userLuck = "50";
+
+  const luckSystem = new LuckSystem(Number(userLuck));
+  const outcome = luckSystem.getOutcome(riskLevel);
+  console.log("Luck system outcome", outcome);
+
+  await redis.set(`luck:${username}`, luckSystem.getLuck().toString());
 
   // Here ill have the generate options
   const result = await gameManager(scenario ? scenario : "", stat, username, useroption);
