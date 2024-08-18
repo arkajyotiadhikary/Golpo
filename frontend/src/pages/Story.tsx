@@ -36,12 +36,15 @@ const Story = () => {
     riskLevel: 'high' | 'mid' | 'safe',
     username?: string, useroption?: string,
   ) => {
+    console.log("Data sending", {
+      scenario, username, useroption, riskLevel, gamestat
+    })
     const response = await http.post("http://localhost:8080/story", {
-      scenario,
+      scenario: scenario,
       stat: gamestat,
-      username,
-      useroption,
-      riskLevel
+      username: username,
+      useroption: useroption,
+      riskLevel: riskLevel
     });
     if (response) {
       setGameDate(response.data.result)
@@ -54,11 +57,18 @@ const Story = () => {
 
   const handleNext = (e: React.MouseEvent<HTMLButtonElement>, riskLevel: 'high' | 'mid' | 'safe') => {
     const useroption = e.currentTarget.value;
-    fetchStory(gameData.scenario, "continue", username, useroption, riskLevel);
+    console.log("Data to send for next scenario", {
+      scenario: gameData.scenario,
+      stat: "continue",
+      username: username,
+      useroption,
+      riskLevel
+    })
+    fetchStory(gameData.scenario, "continue", riskLevel, username, useroption);
   }
 
   useEffect(() => {
-    fetchStory("", "start", username, "", "safe");
+    fetchStory('', 'start', 'safe', username, "");
   }, [])
 
 

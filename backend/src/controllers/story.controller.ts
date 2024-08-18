@@ -57,8 +57,8 @@ const gameManager = async (scenario: string, gamestat: "start" | "continue" | "e
 }
 
 const story = async (req: Request, res: Response) => {
-  const { username, stat, scenario, useroption, riskLevel } = req.body;
-  console.log("Data recived: ", username, stat, scenario, useroption, riskLevel);
+  const { stat, username, scenario, useroption, riskLevel } = req.body;
+  console.log("Data recived: ", { username, stat, scenario, useroption, riskLevel });
 
   let userLuck = await redis.get(`luck:${username}`);
 
