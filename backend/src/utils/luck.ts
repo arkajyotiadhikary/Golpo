@@ -1,13 +1,33 @@
-class LuckSystem {
-  private luck: number; //luck is a number remember that
-
-  constructor(initLuck: number = 50) {
+class PointSystem {
+   //luck is a number remember that
+  private health: number;
+  private wealth: number;
+  private luck: number;
+  
+  constructor(initHealth:number = 100, initWealth:number = 10, initLuck: number = 50) {
+    this.health = initHealth;
+    this.wealth = initWealth;
     this.luck = initLuck;
   }
 
   // Method to adjust LuckSystem
   adjustLuck(amount: number): void {
     this.luck = Math.max(0, Math.min(100, this.luck + amount));
+  }
+
+  adjustHealth(amount:number):void{
+    this.health = Math.max(0, Math.min(100,this.health+amount));
+  }
+
+  adjustWealth(amount:number):void{
+    this.wealth = Math.max(0, Math.min(100,this.wealth+amount));
+  }
+
+  // Method to get type of punishment
+  private getPunishment():string{
+    const roll = Math.random() * 10;
+    if(roll < 5) return 'health';
+    else return 'wealth';
   }
 
   // Generate outcome based on your luck.
@@ -31,8 +51,16 @@ class LuckSystem {
     return outcome;
   }
 
-  getLuck(): number {
-    return this.luck;
+  getPoints():{
+    health:number;
+    wealth:number;
+    luck:number;
+  } {
+    return {
+      health:this.health,
+      wealth:this.wealth,
+      luck:this.luck,
+    };
   }
 
   private highReward(): string {
@@ -55,23 +83,52 @@ class LuckSystem {
 
 
   private highPunishment(): string {
+    const reduceValue = -20;
     //TODO Find out better reward for this
-    this.adjustLuck(-20);
-    return 'High punishment';
+    this.adjustLuck(reduceValue);
+    const punishment = this.getPunishment();
+    
+    if(punishment === 'health'){
+      this.adjustHealth(reduceValue);
+      return 'High punishment with reducing health.'
+    }
+    else {
+      this.adjustWealth(reduceValue);
+      return 'High punishment with reducing wealth.'
+    }
   }
 
   private midPunishment(): string {
+    const reduceValue = -10;
     //TODO Find out better reward for this
-    this.adjustLuck(-10);
-    return 'Mid punishment';
+    this.adjustLuck(reduceValue);
+    const punishment = this.getPunishment();
+    
+    if(punishment === 'health'){
+      this.adjustHealth(reduceValue);
+      return 'Mid punishment with reducing health.'
+    }
+    else {
+      this.adjustWealth(reduceValue);
+      return 'Mid punishment with reducing wealth.'
+    }
   }
 
-  private safePunishment(): string {
+  private safePunishment(): string { 
+    const reduceValue = -5;
     //TODO Find out better reward for this
-    this.adjustLuck(-5);
-    return 'Low punishment';
+    this.adjustLuck(reduceValue);
+    const punishment = this.getPunishment();
+    
+    if(punishment === 'health'){
+      this.adjustHealth(reduceValue);
+      return 'Low punishment with reducing health.'
+    }
+    else {
+      this.adjustWealth(reduceValue);
+      return 'Low punishment with reducing wealth.'
+    }   
   }
-
 }
 
-export default LuckSystem;
+export default PointSystem;

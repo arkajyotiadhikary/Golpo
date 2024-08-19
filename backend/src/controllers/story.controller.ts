@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { generateOptionsHfInference, generateScenarioHfInference, generateImageFromPrompt, generateTextFromPrompt } from "../utils/transformer.js";
 import Redis from 'ioredis';
-import LuckSystem from '../utils/luck.js';
+import PointSystem from '../utils/luck.js';
 /*
  * start the story using this function
  * take input username from the user
@@ -60,15 +60,22 @@ const story = async (req: Request, res: Response) => {
   const { stat, username, scenario, useroption, riskLevel } = req.body;
   console.log("Data recived: ", { username, stat, scenario, useroption, riskLevel });
 
-  let userLuck = await redis.get(`luck:${username}`);
+  const  getUserPoint = await redis.get(`user:${username}`);
+  let userPoint = null;
 
-  if (userLuck === null) userLuck = "50";
+  if(getUserPoint !== null) userPoint =  JSON.parse(getUserPoint);
 
-  const luckSystem = new LuckSystem(Number(userLuck));
-  const outcome = luckSystem.getOutcome(riskLevel);
-  console.log("Luck system outcome", outcome);
+  if (userPoint === null) userPoint = {
+    health:100,
+    wealth:10,
+    luck:50,
+  };
 
-  await redis.set(`luck:${username}`, luckSystem.getLuck().toString());
+  const pointSystem = new PointSystem(Number(userPoint.health),Number(userPoint.wealth),Number(userPoint.luck));
+  const outcome = pointSystem.getOutcome(riskLevel);
+  console.log("Point system outcome", outcome);
+
+  await redis.set(`user:${username}`, JSON.stringify(pointSystem.getPoints()));
 
   // Here ill have the generate options
   const result = await gameManager(scenario ? scenario : "", stat, username, useroption);

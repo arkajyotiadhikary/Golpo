@@ -104,7 +104,7 @@ export const generateScenarioHfInference = async (prevScenario: string, userOpti
 
   } catch (error: any) {
     console.error("Error generating scenarios");
-    throw error;
+    return;
 
   }
 }
