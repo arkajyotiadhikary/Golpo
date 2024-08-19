@@ -75,11 +75,13 @@ const story = async (req: Request, res: Response) => {
   const outcome = pointSystem.getOutcome(riskLevel);
   console.log("Point system outcome", outcome);
 
-  await redis.set(`user:${username}`, JSON.stringify(pointSystem.getPoints()));
+  const points = pointSystem.getPoints();
+
+  await redis.set(`user:${username}`, JSON.stringify(points));
 
   // Here ill have the generate options
   const result = await gameManager(scenario ? scenario : "", stat, username, useroption);
-  if (result) return res.status(200).json({ result })
+  if (result) return res.status(200).json({ result,points })
   else return res.status(500);
 };
 

@@ -12,7 +12,12 @@ const Story = () => {
 
   const [gameData, setGameDate] = useState({
     scenario: "",
-    options: []
+    options: [],
+    points:{
+      healht:100,
+      wealth:10,
+      luck:50,
+    }
   });
 
   const [image, setImage] = useState("");
@@ -130,7 +135,7 @@ const Story = () => {
             ))}
           </ul>
           <div className="mt-8">
-            <GameUI />
+            <GameUI points={gameData.points}/>
           </div>
         </div>
       </div>
