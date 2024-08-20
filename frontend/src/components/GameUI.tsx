@@ -8,18 +8,21 @@ import luckIcon from "../public/luck.png";
 // progress -- for indication bar
 import { Progress } from '@chakra-ui/react'
 
-interface IGameUI{
-  health:number;
-  wealth:number;
-  luck:number;
+interface IGameUI {
+  points: {
+    health: number;
+    wealth: number;
+    luck: number;
+
+  }
 }
 
 
-const GameUI:React.FC<IGameUI> = (props) => {
+const GameUI: React.FC<IGameUI> = (props) => {
 
-  const {health,wealth,luck} = props;
+  const { health, wealth, luck } = props.points;
 
-  console.log(health,wealth,luck);
+  console.log(health, wealth, luck);
   return (
     <div className="flex justify-between my-10 p-6 bg-gray-800 rounded-lg shadow-lg">
       {/* Health */}

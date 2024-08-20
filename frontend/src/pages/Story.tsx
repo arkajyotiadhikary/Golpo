@@ -13,10 +13,10 @@ const Story = () => {
   const [gameData, setGameDate] = useState({
     scenario: "",
     options: [],
-    points:{
-      healht:100,
-      wealth:10,
-      luck:50,
+    points: {
+      healht: 100,
+      wealth: 10,
+      luck: 50,
     }
   });
 
@@ -52,7 +52,11 @@ const Story = () => {
       riskLevel: riskLevel
     });
     if (response) {
-      setGameDate(response.data.result)
+      console.log(response.data);
+      const scenario = response.data.result.scenario;
+      const options = response.data.result.options;
+      const points = response.data.points;
+      setGameDate({ ...gameData, scenario, options, points })
       if (getImage) // If user wants the AI generaeted images request here
       {
         await fetchImage(gameData.scenario);
@@ -135,7 +139,7 @@ const Story = () => {
             ))}
           </ul>
           <div className="mt-8">
-            <GameUI points={gameData.points}/>
+            <GameUI points={gameData.points} />
           </div>
         </div>
       </div>

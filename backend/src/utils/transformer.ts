@@ -54,7 +54,7 @@ export const generateTextFromPrompt = async (prompt: string) => {
     if (result) return result;
     return;
   } catch (error: any) {
-    console.error("Error generating ")
+    console.error("Error generating ", error);
   }
 }
 

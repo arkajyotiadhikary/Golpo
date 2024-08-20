@@ -16,7 +16,7 @@ const gameManager = async (scenario: string, gamestat: "start" | "continue" | "e
 
   switch (gamestat) {
     case "start": {
-      console.log("Game has been started");
+      console.log(`Game has been started for the user ${username}`);
       const prePrompt = `In the mystical land of Eldoria, where magic and technology coexist, you, ${username}, a renowned adventurer, are called upon to solve a mysterious series of occurrences. The first clue is a strange symbol found at the scene of the first incident. What do you do next?`;
       try {
         const options = await generateOptionsHfInference(prePrompt);
@@ -60,18 +60,18 @@ const story = async (req: Request, res: Response) => {
   const { stat, username, scenario, useroption, riskLevel } = req.body;
   console.log("Data recived: ", { username, stat, scenario, useroption, riskLevel });
 
-  const  getUserPoint = await redis.get(`user:${username}`);
+  const getUserPoint = await redis.get(`user:${username}`);
   let userPoint = null;
 
-  if(getUserPoint !== null) userPoint =  JSON.parse(getUserPoint);
+  if (getUserPoint !== null) userPoint = JSON.parse(getUserPoint);
 
   if (userPoint === null) userPoint = {
-    health:100,
-    wealth:10,
-    luck:50,
+    health: 100,
+    wealth: 10,
+    luck: 50,
   };
 
-  const pointSystem = new PointSystem(Number(userPoint.health),Number(userPoint.wealth),Number(userPoint.luck));
+  const pointSystem = new PointSystem(Number(userPoint.health), Number(userPoint.wealth), Number(userPoint.luck));
   const outcome = pointSystem.getOutcome(riskLevel);
   console.log("Point system outcome", outcome);
 
@@ -80,8 +80,8 @@ const story = async (req: Request, res: Response) => {
   await redis.set(`user:${username}`, JSON.stringify(points));
 
   // Here ill have the generate options
-  const result = await gameManager(scenario ? scenario : "", stat, username, useroption);
-  if (result) return res.status(200).json({ result,points })
+  const result = await gameManager(scenario ? scenario : "", stat, riskLevel, username, useroption);
+  if (result) return res.status(200).json({ result, points })
   else return res.status(500);
 };
 
