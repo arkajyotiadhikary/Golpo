@@ -7,9 +7,8 @@ import { HfInference } from "@huggingface/inference";
 import { generateContinuePrompt, generateOptionPrompt } from "./prompts.js";
 
 const token = process.env.HUGGING_FACE_TOKEN;
-console.log("Loaded hf token: ", token);
 
-// Hf initialz
+// Hf initialz:
 const hf = new HfInference(token);
 
 

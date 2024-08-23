@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { http } from "../utils/axios.ts";
 import Footer from '../layouts/Footer.tsx';
-import GameUI from "../components/GameUI.tsx"
+import GameUI from "../components/GameUI.tsx";
+
+import {SkeletonText} from "@chakra-ui/react";
 
 const Story = () => {
   const { state } = useLocation();
@@ -10,7 +12,7 @@ const Story = () => {
 
   const riskLevel = ['high', 'mid', 'safe'] as const;
 
-  const [gameData, setGameDate] = useState({
+  const [gameData, setGameData] = useState({
     scenario: "",
     options: [],
     points: {
@@ -56,7 +58,7 @@ const Story = () => {
       const scenario = response.data.result.scenario;
       const options = response.data.result.options;
       const points = response.data.points;
-      setGameDate({ ...gameData, scenario, options, points })
+      setGameData({ ...gameData, scenario, options, points })
       if (getImage) // If user wants the AI generaeted images request here
       {
         await fetchImage(gameData.scenario);
@@ -65,6 +67,15 @@ const Story = () => {
   };
 
   const handleNext = (e: React.MouseEvent<HTMLButtonElement>, riskLevel: 'high' | 'mid' | 'safe') => {
+    setGameData({
+      scenario: "",
+      options: [],
+      points: {
+        healht: 100,
+        wealth: 10,
+        luck: 50,
+      }
+  });
     const useroption = e.currentTarget.value;
     console.log("Data to send for next scenario", {
       scenario: gameData.scenario,
@@ -122,9 +133,12 @@ const Story = () => {
 
         {/* Options Section */}
         <div className="w-full md:w-1/2 flex flex-col justify-center p-4">
-          <p className="text-lg text-gray-700 text-center md:text-left mb-6">
+          {
+          gameData.scenario ? <p className="text-lg text-gray-700 text-center md:text-left mb-6">
             {gameData.scenario}
-          </p>
+          </p>:<SkeletonText noOfLines={6} spacing='4' skeletonHeight='6'/>
+          }
+
           <ul className="space-y-4">
             {gameData.options.map((option, index) => (
               <li key={index}>

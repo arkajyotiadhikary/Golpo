@@ -61,7 +61,7 @@ const story = async (req: Request, res: Response) => {
   console.log("Data recived: ", { username, stat, scenario, useroption, riskLevel });
 
   const getUserPoint = await redis.get(`user:${username}`);
-  console.log("User point stored in redis: ",getUserPoint);
+  console.log("User point stored in redis: ", getUserPoint);
 
   let userPoint = null;
 
@@ -71,7 +71,7 @@ const story = async (req: Request, res: Response) => {
     health: 100,
     wealth: 10,
     luck: 50,
-    actions:0,
+    actions: 0,
   };
 
   const pointSystem = new PointSystem(Number(userPoint.health), Number(userPoint.wealth), Number(userPoint.luck), Number(userPoint.actions));

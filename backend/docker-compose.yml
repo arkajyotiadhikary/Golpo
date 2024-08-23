@@ -1,0 +1,22 @@
+
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - redis
+    command: npm start
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
