@@ -68,7 +68,7 @@ const Story: React.FC = () => {
       scenario: "",
       options: [],
       points: {
-        healht: 100,
+        health: 100,
         wealth: 10,
         luck: 50,
       }
