@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { http } from "../utils/axios.ts";
 import Footer from '../layouts/Footer.tsx';
 import GameUI from "../components/GameUI.tsx";
 
-import {SkeletonText} from "@chakra-ui/react";
+import { SkeletonText } from "@chakra-ui/react";
 
-const Story = () => {
+const Story: React.FC = () => {
   const { state } = useLocation();
   const { username } = state || {};
 
@@ -16,18 +16,18 @@ const Story = () => {
     scenario: "",
     options: [],
     points: {
-      healht: 100,
+      health: 100,
       wealth: 10,
       luck: 50,
     }
   });
 
   const [image, setImage] = useState("");
-  const [getImage, setGetImage] = useState(true); // To handle do we need AI genererated images or not.
+  // To handle do we need AI genererated images or not.
 
   const fetchImage = async (scenario: string) => {
     try {
-      const resImg = await http.post("http://localhost:8080/get-image", {
+      const resImg = await http.post("https://golpo-backend-latest.onrender.com/get-image", {
         prompt: `Create a colorful, imaginative drawing for the scenario "${scenario}" with a comic-style and Zelda-inspired vibe. The image should be vibrant and whimsical, incorporating elements typical of a comic book and the artistic style found in the Zelda series. Avoid using realistic objects; instead, focus on creating a dynamic, fantasy-inspired scene. #${Math.floor(Math.random() * 10000)}`
       })
       if (resImg.data.image) setImage(resImg.data.image);
@@ -46,7 +46,7 @@ const Story = () => {
     console.log("Data sending", {
       scenario, username, useroption, riskLevel, gamestat
     })
-    const response = await http.post("http://localhost:8080/story", {
+    const response = await http.post("https://golpo-backend-latest.onrender.com/story", {
       scenario: scenario,
       stat: gamestat,
       username: username,
@@ -59,10 +59,7 @@ const Story = () => {
       const options = response.data.result.options;
       const points = response.data.points;
       setGameData({ ...gameData, scenario, options, points })
-      if (getImage) // If user wants the AI generaeted images request here
-      {
-        await fetchImage(gameData.scenario);
-      }
+      await fetchImage(gameData.scenario);
     };
   };
 
@@ -75,7 +72,7 @@ const Story = () => {
         wealth: 10,
         luck: 50,
       }
-  });
+    });
     const useroption = e.currentTarget.value;
     console.log("Data to send for next scenario", {
       scenario: gameData.scenario,
@@ -134,13 +131,13 @@ const Story = () => {
         {/* Options Section */}
         <div className="w-full md:w-1/2 flex flex-col justify-center p-4">
           {
-          gameData.scenario ? <p className="text-lg text-gray-700 text-center md:text-left mb-6">
-            {gameData.scenario}
-          </p>:<SkeletonText noOfLines={6} spacing='4' skeletonHeight='6'/>
+            gameData.scenario ? <p className="text-lg text-gray-700 text-center md:text-left mb-6">
+              {gameData.scenario}
+            </p> : <SkeletonText noOfLines={6} spacing='4' skeletonHeight='6' />
           }
 
           <ul className="space-y-4">
-            {gameData.options.map((option, index) => (
+            {gameData.options.map((option: string, index) => (
               <li key={index}>
                 <button
                   onClick={(e) => handleNext(e, riskLevel[index])}

@@ -8,7 +8,9 @@ import PointSystem from '../utils/point.js';
  * have a const prompt to form the startig prompt
  */
 
-const redis = new Redis();
+const redis = new Redis(17379, 'redis-17379.c212.ap-south-1-1.ec2.redns.redis-cloud.com', {
+  password: 'Hp7gspzlttbE5OySpDeVzDAnzv4WVpFy',
+});
 
 const gameManager = async (scenario: string, gamestat: "start" | "continue" | "end", riskLevel: string, username?: string, useroption?: string) => {
 

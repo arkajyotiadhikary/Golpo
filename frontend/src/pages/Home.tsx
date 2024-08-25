@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { http } from "../utils/axios.ts";
 
 import Footer from "../layouts/Footer";
@@ -8,7 +7,7 @@ import { Skeleton, SkeletonText } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 
-const Home = () => {
+const Home: React.FC = () => {
   const [image, setImage] = useState(""); // Image for the home page.
   const [username, setUsername] = useState("");
   const [text, setText] = useState(""); // Text for the right side of the image.
@@ -18,14 +17,14 @@ const Home = () => {
   useEffect(() => {
     const generateImage = async () => {
       try {
-        const resText = await http.post("http://localhost:8080/get-text", {
+        const resText = await http.post("https://golpo-backend-latest.onrender.com/get-text", {
           prompt: `Write a brief and inviting introduction for a children's story website. In just a few lines, capture the excitement of exploring magical worlds, meeting new characters, and diving into interactive adventures. The tone should be warm, engaging, and full of wonder, perfect for a landing page.
                               )}}`,
         });
         console.log(resText.data.result);
         setText(resText.data.result);
 
-        const resImg = await http.post("http://localhost:8080/get-image", {
+        const resImg = await http.post("https://golpo-backend-latest.onrender.com/get-image", {
           prompt: `Create a colorful and imaginative drawing of a magical forest where friendly animals live and adventure awaits. Include whimsical elements like talking trees, glowing flowers, and playful creatures to spark children's imaginations and complement a fun and engaging story. #${Math.floor(
             Math.random() * 10000
           )}`,
@@ -47,11 +46,11 @@ const Home = () => {
     generateImage();
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     navigate("/story", { state: { username } })
   }

@@ -11,12 +11,5 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    depends_on:
-      - redis
-    command: npm start
-
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
-
+    command: node --max_old_space_size=8192 ./dist/index.js
+    
